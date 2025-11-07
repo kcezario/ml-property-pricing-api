@@ -2,12 +2,11 @@
 Serviço de predição de preços de imóveis.
 """
 
-from typing import Optional
-
 import mlflow
-import mlflow.sklearn
-from sklearn.base import BaseEstimator
+import mlflow.pyfunc
+import pandas as pd
 
+from app.config import settings
 from app.schemas.prediction import PredictionInput, PredictionOutput
 
 
@@ -17,36 +16,23 @@ class PredictorService:
 
     Attributes:
         model: Modelo de Machine Learning carregado do MLflow.
+        model_uri: URI do modelo no MLflow Model Registry.
     """
 
-    def __init__(self, model_name: Optional[str] = None, model_stage: str = "Production"):
+    def __init__(self) -> None:
         """
         Inicializa o serviço de predição.
 
-        Args:
-            model_name: Nome do modelo no MLflow Model Registry.
-            model_stage: Estágio do modelo (Production, Staging, etc.).
+        Configura o tracking URI do MLflow e carrega o modelo do Model Registry.
         """
-        self.model: Optional[BaseEstimator] = None
-        self.model_name = model_name
-        self.model_stage = model_stage
-        # TODO: Carregar modelo do MLflow quando implementado
+        # Configurar tracking URI do MLflow
+        mlflow.set_tracking_uri(settings.MLFLOW_TRACKING_URI)
 
-    def load_model(self) -> None:
-        """
-        Carrega o modelo do MLflow Model Registry.
+        # Construir URI do modelo dinamicamente
+        self.model_uri = f"models:/{settings.MODEL_NAME}/{settings.MODEL_STAGE}"
 
-        Raises:
-            ValueError: Se o modelo não puder ser carregado.
-        """
-        if self.model_name is None:
-            # TODO: Implementar carregamento do modelo
-            pass
-        else:
-            # TODO: Carregar modelo usando mlflow.pyfunc.load_model()
-            # model_uri = f"models:/{self.model_name}/{self.model_stage}"
-            # self.model = mlflow.pyfunc.load_model(model_uri)
-            pass
+        # Carregar modelo do MLflow
+        self.model = mlflow.pyfunc.load_model(self.model_uri)
 
     def predict(self, input_data: PredictionInput) -> PredictionOutput:
         """
@@ -56,30 +42,23 @@ class PredictorService:
             input_data: Dados de entrada do imóvel.
 
         Returns:
-            PredictionOutput: Resultado da predição.
+            PredictionOutput: Resultado da predição com o valor predito.
 
         Raises:
             ValueError: Se o modelo não estiver carregado.
         """
         if self.model is None:
-            raise ValueError("Modelo não foi carregado. Chame load_model() primeiro.")
+            raise ValueError("Modelo não foi carregado corretamente.")
 
-        # TODO: Implementar pré-processamento dos dados
-        # TODO: Chamar model.predict() com os dados pré-processados
-        # TODO: Retornar PredictionOutput com o resultado
+        # Converter PredictionInput para DataFrame do Pandas
+        # Garantir a ordem das colunas conforme esperado pelo modelo
+        input_dict = input_data.model_dump()
+        input_df = pd.DataFrame([input_dict], columns=settings.FEATURE_ORDER)
 
-        # Placeholder
-        return PredictionOutput(price=100000.0, confidence=0.95)
+        # Fazer predição
+        prediction = self.model.predict(input_df)
 
+        # Extrair valor numérico da predição
+        predicted_value = float(prediction[0])
 
-def get_predictor_service() -> PredictorService:
-    """
-    Factory function para criar instância do PredictorService.
-
-    Returns:
-        PredictorService: Instância do serviço de predição.
-    """
-    service = PredictorService()
-    # TODO: Carregar modelo na inicialização quando implementado
-    return service
-
+        return PredictionOutput(predicted_value=predicted_value)

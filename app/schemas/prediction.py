@@ -9,25 +9,49 @@ class PredictionInput(BaseModel):
     """
     Schema de entrada para predição de preço de imóvel.
 
+    Baseado no dataset California Housing, contém as seguintes features:
+    - MedInc: Renda mediana do bloco
+    - HouseAge: Idade mediana da casa
+    - AveRooms: Número médio de quartos
+    - AveBedrms: Número médio de quartos de dormir
+    - Population: População do bloco
+    - AveOccup: Ocupação média
+    - Latitude: Latitude do bloco
+    - Longitude: Longitude do bloco
+
     Attributes:
-        area: Área total do imóvel em metros quadrados.
-        bedrooms: Número de quartos.
-        bathrooms: Número de banheiros.
-        # TODO: Adicionar mais campos conforme necessário
+        MedInc: Renda mediana do bloco.
+        HouseAge: Idade mediana da casa.
+        AveRooms: Número médio de quartos.
+        AveBedrms: Número médio de quartos de dormir.
+        Population: População do bloco.
+        AveOccup: Ocupação média.
+        Latitude: Latitude do bloco.
+        Longitude: Longitude do bloco.
     """
 
-    area: float = Field(..., gt=0, description="Área total do imóvel em m²")
-    bedrooms: int = Field(..., ge=0, description="Número de quartos")
-    bathrooms: int = Field(..., ge=0, description="Número de banheiros")
+    MedInc: float = Field(..., description="Renda mediana do bloco")
+    HouseAge: float = Field(..., description="Idade mediana da casa")
+    AveRooms: float = Field(..., gt=0, description="Número médio de quartos")
+    AveBedrms: float = Field(..., ge=0, description="Número médio de quartos de dormir")
+    Population: float = Field(..., ge=0, description="População do bloco")
+    AveOccup: float = Field(..., gt=0, description="Ocupação média")
+    Latitude: float = Field(..., description="Latitude do bloco")
+    Longitude: float = Field(..., description="Longitude do bloco")
 
     class Config:
         """Configuração do modelo Pydantic."""
 
         json_schema_extra = {
             "example": {
-                "area": 100.0,
-                "bedrooms": 3,
-                "bathrooms": 2,
+                "MedInc": 8.3252,
+                "HouseAge": 41.0,
+                "AveRooms": 6.984127,
+                "AveBedrms": 1.023810,
+                "Population": 322.0,
+                "AveOccup": 2.555556,
+                "Latitude": 37.88,
+                "Longitude": -122.23,
             }
         }
 
@@ -37,22 +61,16 @@ class PredictionOutput(BaseModel):
     Schema de saída para predição de preço de imóvel.
 
     Attributes:
-        price: Preço predito do imóvel.
-        confidence: Nível de confiança da predição (0.0 a 1.0).
+        predicted_value: Valor predito do imóvel (em centenas de milhares de dólares).
     """
 
-    price: float = Field(..., ge=0, description="Preço predito do imóvel")
-    confidence: float = Field(
-        ..., ge=0.0, le=1.0, description="Nível de confiança da predição"
-    )
+    predicted_value: float = Field(..., description="Valor predito do imóvel")
 
     class Config:
         """Configuração do modelo Pydantic."""
 
         json_schema_extra = {
             "example": {
-                "price": 250000.0,
-                "confidence": 0.92,
+                "predicted_value": 4.526,
             }
         }
-
