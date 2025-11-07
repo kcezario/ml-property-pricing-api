@@ -29,7 +29,7 @@ class PredictorService:
         mlflow.set_tracking_uri(settings.MLFLOW_TRACKING_URI)
 
         # Construir URI do modelo dinamicamente
-        self.model_uri = f"models:/{settings.MODEL_NAME}/{settings.MODEL_STAGE}"
+        self.model_uri = f"models:/{settings.MODEL_NAME}@{settings.MODEL_STAGE}"
 
         # Carregar modelo do MLflow
         self.model = mlflow.pyfunc.load_model(self.model_uri)

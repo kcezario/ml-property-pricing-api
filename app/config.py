@@ -18,10 +18,9 @@ class Settings(BaseSettings):
     """
 
     MODEL_NAME: str = "property-price-predictor"
-    MODEL_STAGE: str = "Staging"
+    MODEL_STAGE: str = "staging"
     MLFLOW_TRACKING_URI: str = "mlruns"
 
-    # Ordem das features conforme esperado pelo modelo (California Housing)
     FEATURE_ORDER: List[str] = [
         "MedInc",
         "HouseAge",

@@ -17,7 +17,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-from scripts.constants import TRAIN_ARGUMENTS
+from constants import TRAIN_ARGUMENTS
 
 
 def load_data() -> Tuple[pd.DataFrame, pd.Series]:
