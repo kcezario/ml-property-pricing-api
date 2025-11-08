@@ -3,6 +3,9 @@ FROM python:3.12-slim as builder
 
 WORKDIR /app
 
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
 # Install Poetry
 RUN pip install --no-cache-dir poetry
 
@@ -11,19 +14,19 @@ COPY pyproject.toml poetry.lock* ./
 
 # Install dependencies
 RUN poetry config virtualenvs.create false && \
-    poetry install --no-dev --no-interaction --no-ansi
+    poetry install -only main --no-interaction --no-ansi
 
 # Stage 2: Runtime stage
-FROM python:3.12-slim
+FROM python:3.12-slim AS runtime
 
 WORKDIR /app
 
 # Copy installed packages from builder
-COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
-COPY --from=builder /usr/local/bin /usr/local/bin
+COPY --from=builder /app/.venv /app/.venv
+ENV PATH="/app/.venv/bin:$PATH"
 
 # Copy application code
-COPY app/ ./app/
+COPY ./app /app/app
 
 # Expose port
 EXPOSE 8000
