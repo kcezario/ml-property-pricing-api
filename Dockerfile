@@ -1,10 +1,10 @@
 # Stage 1: Build stage
-FROM python:3.12-slim as builder
+FROM python:3.12-slim AS builder
 
 WORKDIR /app
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 # Install Poetry
 RUN pip install --no-cache-dir poetry
@@ -14,7 +14,7 @@ COPY pyproject.toml poetry.lock* ./
 
 # Install dependencies
 RUN poetry config virtualenvs.create false && \
-    poetry install -only main --no-interaction --no-ansi
+    poetry install --only main --no-interaction --no-ansi
 
 # Stage 2: Runtime stage
 FROM python:3.12-slim AS runtime
