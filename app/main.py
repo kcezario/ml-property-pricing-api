@@ -5,6 +5,9 @@ Aplicação principal FastAPI.
 from fastapi import FastAPI
 
 from app.api import predict
+from utils.logger import get_logger
+
+log = get_logger(__name__)
 
 app = FastAPI(
     title="ML Property Pricing API",
@@ -24,6 +27,7 @@ async def root():
     Returns:
         dict: Mensagem de status da API.
     """
+    log.debug("Solicitação recebida no endpoint raiz")
     return {"message": "ML Property Pricing API", "status": "running"}
 
 
@@ -35,5 +39,6 @@ async def health():
     Returns:
         dict: Status detalhado da API.
     """
+    log.debug("Verificação de saúde executada com sucesso")
     return {"status": "ok"}
 

@@ -10,6 +10,9 @@ import pandas as pd
 
 from app.config import settings
 from app.schemas.prediction import PredictionInput, PredictionOutput
+from utils.logger import get_logger
+
+log = get_logger(__name__)
 
 
 class PredictorService:
@@ -27,9 +30,16 @@ class PredictorService:
 
         Configura o tracking URI do MLflow e carrega o modelo do Model Registry.
         """
+        log.info("Inicializando PredictorService")
         mlflow.set_tracking_uri(settings.MLFLOW_TRACKING_URI)
         self.model_uri = f"models:/{settings.MODEL_NAME}@{settings.MODEL_STAGE}"
-        self.model = mlflow.pyfunc.load_model(self.model_uri)
+        log.debug("Model URI configurada: %s", self.model_uri)
+        try:
+            self.model = mlflow.pyfunc.load_model(self.model_uri)
+            log.info("Modelo carregado com sucesso a partir do MLflow")
+        except Exception as error:
+            log.critical("Falha ao carregar modelo do MLflow: %s", error)
+            raise
 
     def predict(self, input_data: PredictionInput) -> PredictionOutput:
         """
@@ -45,12 +55,17 @@ class PredictorService:
             ValueError: Se o modelo não estiver carregado.
         """
         if self.model is None:
+            log.error("Modelo não carregado ao tentar realizar predição")
             raise ValueError("Modelo não foi carregado corretamente.")
 
+        log.debug("Convertendo dados de entrada para DataFrame")
         input_dict = input_data.model_dump()
         input_df = pd.DataFrame([input_dict], columns=settings.FEATURE_ORDER)
+
+        log.debug("Iniciando predição com modelo carregado")
         prediction = self.model.predict(input_df)
         predicted_value = float(prediction[0])
+        log.info("Predição concluída com sucesso")
         return PredictionOutput(predicted_value=predicted_value)
 
 

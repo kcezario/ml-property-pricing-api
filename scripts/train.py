@@ -17,7 +17,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-from constants import TRAIN_ARGUMENTS
+from scripts.constants import TRAIN_ARGUMENTS
+from utils.logger import get_logger
+
+log = get_logger(__name__)
 
 
 def load_data() -> Tuple[pd.DataFrame, pd.Series]:
@@ -28,12 +31,13 @@ def load_data() -> Tuple[pd.DataFrame, pd.Series]:
         Tuple[pd.DataFrame, pd.Series]: Tupla contendo features (X) e target (y)
             como DataFrames/Series do Pandas.
     """
-    # Carregar dataset
+    log.info("Carregando dataset California Housing")
     california_housing = fetch_california_housing(as_frame=True)
 
     # Converter para DataFrames do Pandas
     X = california_housing.frame.drop(columns=["MedHouseVal"])
     y = california_housing.frame["MedHouseVal"]
+    log.debug("Dados carregados com %s amostras e %s features", X.shape[0], X.shape[1])
 
     return X, y
 
@@ -98,58 +102,62 @@ def main() -> None:
 
     # Configurar semente para reprodutibilidade
     np.random.seed(args.random_state)
+    log.debug("Semente aleatória configurada com valor %s", args.random_state)
 
     # Configurar experimento do MLflow
     mlflow.set_experiment(args.experiment_name)
+    log.info("Experimento do MLflow definido: %s", args.experiment_name)
 
     # Carregar dados
-    print("Carregando dados...")
     X, y = load_data()
-    print(f"Dados carregados: {X.shape[0]} amostras, {X.shape[1]} features")
+    log.info("Dados carregados: %s amostras | %s features", X.shape[0], X.shape[1])
 
     # Dividir dados em treino e teste
-    print("Dividindo dados em treino e teste...")
     X_train, X_test, y_train, y_test = train_test_split(
         X,
         y,
         test_size=args.test_size,
         random_state=args.random_state,
     )
-    print(f"Treino: {X_train.shape[0]} amostras | Teste: {X_test.shape[0]} amostras")
+    log.info(
+        "Conjunto de treino: %s amostras | Conjunto de teste: %s amostras",
+        X_train.shape[0],
+        X_test.shape[0],
+    )
 
     # Iniciar run do MLflow
     with mlflow.start_run():
         # Definir hiperparâmetros
-        hyperparameters = {
+        hyperparameters: Dict[str, Any] = {
             "n_estimators": args.n_estimators,
             "max_depth": args.max_depth,
             "random_state": args.random_state,
         }
 
         # Log de parâmetros
-        print("Registrando parâmetros no MLflow...")
+        log.info("Registrando hiperparâmetros no MLflow")
+        log.debug("Hiperparâmetros utilizados: %s", hyperparameters)
         mlflow.log_params(hyperparameters)
         mlflow.log_param("test_size", args.test_size)
 
         # Criar pipeline
-        print("Criando pipeline...")
         pipeline = build_pipeline(
             n_estimators=args.n_estimators,
             max_depth=args.max_depth,
             random_state=args.random_state,
         )
+        log.info("Pipeline criado com RandomForestRegressor")
 
         # Treinar pipeline
-        print("Treinando pipeline...")
+        log.info("Iniciando treinamento do pipeline")
         pipeline.fit(X_train, y_train)
-        print("Pipeline treinado com sucesso!")
+        log.info("Treinamento concluído com sucesso")
 
         # Fazer predições
-        print("Fazendo predições no conjunto de teste...")
+        log.info("Gerando predições no conjunto de teste")
         y_pred = pipeline.predict(X_test)
 
         # Calcular métricas
-        print("Calculando métricas...")
         r2 = r2_score(y_test, y_pred)
         mae = mean_absolute_error(y_test, y_pred)
         rmse = sqrt(mean_squared_error(y_test, y_pred))
@@ -160,30 +168,27 @@ def main() -> None:
             "rmse": rmse,
         }
 
-        print(f"Métricas calculadas:")
-        print(f"  R²: {r2:.4f}")
-        print(f"  MAE: {mae:.4f}")
-        print(f"  RMSE: {rmse:.4f}")
+        log.info("Métricas calculadas | R²=%.4f | MAE=%.4f | RMSE=%.4f", r2, mae, rmse)
 
         # Log de métricas
-        print("Registrando métricas no MLflow...")
+        log.info("Registrando métricas no MLflow")
         mlflow.log_metrics(metrics)
 
         # Log de tags
-        print("Adicionando tags no MLflow...")
+        log.debug("Registrando tags no MLflow")
         mlflow.set_tag("pipeline_description", "StandardScaler + RandomForest")
         mlflow.set_tag("dataset", "California Housing")
 
         # Log do modelo (pipeline completo)
-        print("Registrando pipeline no MLflow...")
+        log.info("Registrando pipeline completo no MLflow")
         mlflow.sklearn.log_model(
             sk_model=pipeline,
             artifact_path="property-price-predictor",
             registered_model_name="property-price-predictor",
         )
 
-        print("Modelo registrado com sucesso no MLflow!")
-        print(f"Run ID: {mlflow.active_run().info.run_id}")
+        run_id = mlflow.active_run().info.run_id if mlflow.active_run() else "unknown"
+        log.info("Modelo registrado com sucesso no MLflow | Run ID: %s", run_id)
 
 
 if __name__ == "__main__":
