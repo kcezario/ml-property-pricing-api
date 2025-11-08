@@ -13,8 +13,7 @@ RUN pip install --no-cache-dir poetry
 COPY pyproject.toml poetry.lock* ./
 
 # Install dependencies
-RUN poetry config virtualenvs.create false && \
-    poetry install --only main --no-root --no-interaction --no-ansi
+RUN poetry install --only main --no-root --no-interaction --no-ansi
 
 # Stage 2: Runtime stage
 FROM python:3.12-slim AS runtime
@@ -27,8 +26,6 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 # Copy application code
 COPY ./app /app/app
-
-# Expose port
 EXPOSE 8000
 
 # Run the application
