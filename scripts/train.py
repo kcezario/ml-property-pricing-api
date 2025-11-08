@@ -4,7 +4,7 @@ Script de treinamento do modelo de precificação de imóveis.
 
 import argparse
 from math import sqrt
-from typing import Any, Dict, Tuple
+from typing import Any
 
 import mlflow
 import mlflow.sklearn
@@ -23,7 +23,7 @@ from utils.logger import get_logger
 log = get_logger(__name__)
 
 
-def load_data() -> Tuple[pd.DataFrame, pd.Series]:
+def load_data() -> tuple[pd.DataFrame, pd.Series]:
     """
     Carrega o dataset California Housing do Scikit-learn.
 
@@ -86,7 +86,9 @@ def main() -> None:
     Orquestra todo o fluxo: carregamento de dados, divisão train/test,
     treinamento do pipeline, avaliação e registro no MLflow.
     """
-    parser = argparse.ArgumentParser(description="Treina modelo de precificação de imóveis")
+    parser = argparse.ArgumentParser(
+        description="Treina modelo de precificação de imóveis",
+    )
 
     # Adicionar argumentos a partir do dicionário de constantes
     for arg_name, arg_config in TRAIN_ARGUMENTS.items():
@@ -128,7 +130,7 @@ def main() -> None:
     # Iniciar run do MLflow
     with mlflow.start_run():
         # Definir hiperparâmetros
-        hyperparameters: Dict[str, Any] = {
+        hyperparameters: dict[str, Any] = {
             "n_estimators": args.n_estimators,
             "max_depth": args.max_depth,
             "random_state": args.random_state,

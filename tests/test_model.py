@@ -4,7 +4,7 @@ Testes para o modelo de Machine Learning e serviços relacionados.
 
 from __future__ import annotations
 
-from typing import Generator
+from collections.abc import Generator
 from unittest.mock import MagicMock, patch
 
 import pandas as pd

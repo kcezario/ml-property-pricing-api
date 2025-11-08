@@ -2,10 +2,10 @@
 Constantes e configurações para o script de treinamento.
 """
 
-from typing import Any, Dict
+from typing import Any
 
 # Configuração dos argumentos do argparse
-TRAIN_ARGUMENTS: Dict[str, Dict[str, Any]] = {
+TRAIN_ARGUMENTS: dict[str, dict[str, Any]] = {
     "experiment-name": {
         "type": str,
         "default": "property-pricing",

@@ -2,7 +2,6 @@
 Configurações da aplicação usando Pydantic Settings.
 """
 
-from typing import List
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -21,7 +20,7 @@ class Settings(BaseSettings):
     MODEL_STAGE: str = "staging"
     MLFLOW_TRACKING_URI: str = "mlruns"
 
-    FEATURE_ORDER: List[str] = [
+    FEATURE_ORDER: list[str] = [
         "MedInc",
         "HouseAge",
         "AveRooms",
