@@ -14,7 +14,7 @@ COPY pyproject.toml poetry.lock* ./
 
 # Install dependencies
 RUN poetry config virtualenvs.create false && \
-    poetry install --only main --no-interaction --no-ansi
+    poetry install --only main --no-root --no-interaction --no-ansi
 
 # Stage 2: Runtime stage
 FROM python:3.12-slim AS runtime
