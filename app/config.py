@@ -4,7 +4,7 @@ Configurações da aplicação usando Pydantic Settings.
 
 from typing import List
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -32,11 +32,10 @@ class Settings(BaseSettings):
         "Longitude",
     ]
 
-    class Config:
-        """Configuração do Pydantic Settings."""
-
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    model_config: SettingsConfigDict = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+    )
 
 
 # Instância global das configurações
