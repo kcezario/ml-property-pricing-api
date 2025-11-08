@@ -35,5 +35,5 @@ async def health():
     Returns:
         dict: Status detalhado da API.
     """
-    return {"status": "healthy"}
+    return {"status": "ok"}
 

@@ -2,7 +2,7 @@
 Schemas Pydantic para entrada e saída de predições.
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class PredictionInput(BaseModel):
@@ -39,10 +39,8 @@ class PredictionInput(BaseModel):
     Latitude: float = Field(..., description="Latitude do bloco")
     Longitude: float = Field(..., description="Longitude do bloco")
 
-    class Config:
-        """Configuração do modelo Pydantic."""
-
-        json_schema_extra = {
+    model_config: ConfigDict = ConfigDict(
+        json_schema_extra={
             "example": {
                 "MedInc": 8.3252,
                 "HouseAge": 41.0,
@@ -53,7 +51,8 @@ class PredictionInput(BaseModel):
                 "Latitude": 37.88,
                 "Longitude": -122.23,
             }
-        }
+        },
+    )
 
 
 class PredictionOutput(BaseModel):
@@ -66,11 +65,10 @@ class PredictionOutput(BaseModel):
 
     predicted_value: float = Field(..., description="Valor predito do imóvel")
 
-    class Config:
-        """Configuração do modelo Pydantic."""
-
-        json_schema_extra = {
+    model_config: ConfigDict = ConfigDict(
+        json_schema_extra={
             "example": {
                 "predicted_value": 4.526,
             }
-        }
+        },
+    )
